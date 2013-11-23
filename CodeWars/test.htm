@@ -1,0 +1,274 @@
+<!doctype html>
+<head>
+	<title>Misc Codewars solutions</title>
+    <script type="text/javascript">
+        function isPhoneNumber(phoneNumberString) {
+            //var phoneNumberRegex = /^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$/;    
+            //return phoneNumberRegex.test(phoneNumberString);
+            return /^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$/.test(phoneNumberString);
+        }
+        
+        function spinWords(words) {
+            return words.split(" ").map(function(word) {
+                return word.length >= 5 ?
+                        word.split("").reverse().join("")
+                        : word;
+            }).join(" ");   
+        }
+        
+        function score(dice) {
+            var numDice = ["placeholder", 0,0,0,0,0,0];
+            dice.forEach(function(die) {
+                ++numDice[die];
+            });     
+            var total = 0;
+            numDice.forEach(function(value, index) {
+                if(value >= 3) {
+                    if(index == 1) { total += 1000; }
+                    else { total += index * 100; }
+                    value -= 3;
+                }
+                if(index == 1) { total += value * 100; }
+                else if(index == 5) { total += value * 50; }
+            });
+            return total;
+        }
+        
+        function cakes(recipe, available) {
+            var numCakes = Math.pow(2, 32); 
+            for(ingredient in recipe) {
+                if(recipe.hasOwnProperty(ingredient)) {
+                    numCakes =  available[ingredient]
+                            ? Math.min(numCakes, Math.floor(available[ingredient] / recipe[ingredient]))
+                            : 0;
+                }
+            }
+            return numCakes;
+        }
+        
+        function getLines(line) {
+            if(i < 1) { return -1; }
+            var sequence = ["1"];
+            for(var i=1; i < line; ++i) {
+                var prevVal = sequence[i-1];
+                var currentVal = [];
+                var currentNumCount = 1;
+                for(j=1; j < prevVal.length; j++) {
+                    if(prevVal[j] != prevVal[j-1]) {
+                        currentVal.push(currentNumCount + prevVal[j-1]);
+                        currentNumCount = 1;
+                    } else {
+                        ++currentNumCount;
+                    }
+                }
+                currentVal.push(currentNumCount + prevVal[j-1]);
+                sequence.push(currentVal.join(""));
+            }
+            return sequence.join(",");
+        }
+        // Caesar Cipher Helper
+        function CaesarCipher(shift) {
+            this.shiftAmount = shift;
+            this.encode = function(word) {
+                return this.shiftWord(word, false);
+            }
+            
+            this.decode = function(word) {
+                return this.shiftWord(word, true);
+            }
+            
+            this.shiftWord = function(word, reverseShift) {
+                return word.split("").map(function(letter) {
+                    return letter.toUpperCase() < "A" || letter.toUpperCase() > "Z" ? letter
+                    : String.fromCharCode(
+                    ((((letter.toUpperCase().charCodeAt() - "A".charCodeAt()
+                    + (this.shiftAmount * (reverseShift ? -1 : 1))) % 26) + 26) % 26)
+                    + "A".charCodeAt());
+                }.bind(this)).join("");                
+            }
+        }
+        
+        function anagrams(word, words) {
+            return words.filter(function(listWord) { return listWord.split("").sort().join("") == word.split("").sort().join("") });
+        }
+        
+        // http://www.codewars.com/dojo/katas/52774a314c2333f0a7000688/play/javascript
+        function validParentheses(parens) {
+            var openCount = 0;
+            for(var i=0; i < parens.length; ++i) {
+                openCount += (parens[i] == "(") ? 1 : -1;
+                if(openCount < 0) { return false; }
+            }
+            return openCount == 0;
+        }
+
+        // http://www.codewars.com/dojo/katas/5277c8a221e209d3f6000b56/play/javascript
+        function validBraces0(braces) {
+            var parenCount = 0;
+            var curlyCount = 0;
+            var squareCount = 0;
+            for(var i=0; i < braces.length; ++i) {
+                parenCount += (braces[i] == "(") ? 1 : braces[i] == ")" ? -1 : 0;
+                curlyCount += (braces[i] == "{") ? 1 : braces[i] == "}" ? -1 : 0;
+                squareCount += (braces[i] == "[") ? 1 : braces[i] == "]" ? -1 : 0;
+                if(parenCount < 0 || curlyCount < 0 || squareCount < 0) { return false; }
+            }
+            return parenCount == 0 && curlyCount == 0 && squareCount == 0;
+        }
+
+        function validBraces(braces) {
+            return braces.split("").reduce(function(stack, current) {
+                if(current == "(" || current == "{" || current == "[") {
+                    stack.push(current == "(" ? ")" : current == "{" ? "}" : "]");
+                } else if(stack[stack.length - 1] == current) {
+                    stack.pop();
+                } else {
+                    stack = [-1];
+                }
+                return stack;
+            }, []).length == 0;
+        }
+        
+        var snail = function(array) {
+            if(array.length == 0) { return []; }
+            var result = [];
+            for(var i = 0; i < (array[0].length / 2) + 1; ++i) {
+                for(var j = i; j < array[0].length - i; ++j) {
+                    result.push(array[i][j]);
+                }
+                for(var j = i + 1; j < array[0].length - i - 1; ++j) {
+                    result.push(array[j][array[0].length - i - 1]);
+                }
+                if(i < array[0].length - i - 1) {
+                    for(var j = array[0].length - i - 1; j >= i; --j) {
+                        result.push(array[array[0].length - i - 1][j]);
+                    }
+                    for(var j = array[0].length - i - 2; j > i; --j) {
+                        result.push(array[j][i]);
+                    }
+                }
+            }
+            return result;
+        }
+        
+        // http://www.codewars.com/dojo/katas/51fda2d95d6efda45e00004e/play/javascript
+        function User() {
+            this.rank = -8;
+            this.progress = 0;
+        }
+        
+        User.prototype.ranks = {"-8": 0, "-7": 1, "-6": 2, "-5": 3,
+                "-4": 4, "-3": 5, "-2": 6, "-1": 7,
+                "1": 8, "2": 9, "3": 10, "4": 11,
+                "5": 12, "6": 13, "7": 14, "8": 15};
+        
+        User.prototype.incProgress = function(activityLevel) {
+            if(!(activityLevel in User.prototype.ranks)) { throw "Invalid activity level"; }
+            var rankDifference = this.ranks[activityLevel] - this.ranks[this.rank]
+            this.progress += (rankDifference > 0) ?
+                    10 * (rankDifference * rankDifference) :
+                   (rankDifference == 0) ? 3 :
+                   (rankDifference == -1) ? 1 : 0;
+            while(this.progress >= 100 && this.rank < 8) {
+                if(!++this.rank) { ++this.rank }
+                this.progress -= 100;
+            }
+            if(this.rank == 8) { this.progress = 0; }
+        }
+        
+        // http://www.codewars.com/dojo/katas/515bb423de843ea99400000a/play/javascript
+        function PaginationHelper(collection, itemsPerPage) {
+            this.collection = collection;
+            this.itemsPerPage = itemsPerPage;
+        }
+        
+        PaginationHelper.prototype.itemCount = function() {
+            return this.collection.length;
+        }
+        
+        PaginationHelper.prototype.pageCount = function() {
+            return ~~((this.collection.length - 1) / this.itemsPerPage) + 1;
+        }
+        
+        PaginationHelper.prototype.pageItemCount = function(pageIndex) {
+            var itemCount = this.collection.length - pageIndex * this.itemsPerPage;
+            return (itemCount > 0 && pageIndex >= 0) ? Math.min(this.itemsPerPage, itemCount) : -1;
+        }
+        
+        PaginationHelper.prototype.pageIndex = function(itemIndex) {
+            return (itemIndex >= 0 && itemIndex < this.collection.length) ?
+                    ~~(itemIndex / this.itemsPerPage) : -1;
+        }
+        
+        // http://www.codewars.com/dojo/katas/5267e5827526ea15d8000708/play/javascript
+        function getMissingIngredients(recipe, added) {
+            var cakesToBake = 1;
+            for(var ingredient in added) {
+                if(added.hasOwnProperty(ingredient) && recipe.hasOwnProperty(ingredient)) {
+                    cakesToBake = Math.max(cakesToBake, Math.ceil(added[ingredient] / recipe[ingredient]));
+                }
+            }
+            var missing = {};
+            for(var ingredient in recipe) {
+                if(recipe.hasOwnProperty(ingredient)) {
+                    var amountMissing;
+                    if(added.hasOwnProperty(ingredient)) {
+                        amountMissing = (recipe[ingredient] * cakesToBake) - added[ingredient]
+                    } else {
+                        amountMissing = recipe[ingredient] * cakesToBake;
+                    }
+                    if(amountMissing) {
+                        missing[ingredient] = amountMissing;
+                    }
+                }
+            }
+            return missing;
+        }
+        
+        // http://www.codewars.com/dojo/katas/5263c6999e0f40dee200059d/play/javascript
+        var buttonPossibilities = {
+            "0": "08",
+            "1": "124",
+            "2": "1235",
+            "3": "236",
+            "4": "1457",
+            "5": "24568",
+            "6": "3569",
+            "7": "478",
+            "8": "57890",
+            "9": "689"
+        };
+        
+        function getPINs(observed) {
+            return getVariations("", observed.split("").map(function(button) {
+                return buttonPossibilities[button];
+            }));
+        }
+        
+        function getVariations(pressed, toPress) {
+            if(toPress.length == 0) {
+                return [pressed];
+            }
+            var variations = [];
+            for(var i=0; i < toPress[0].length; ++i) {
+                variations = variations.concat(getVariations(pressed + toPress[0][i],
+                        toPress.slice(1)));
+            }
+            return variations;
+        }
+        
+        function runTest() {
+            var resultDiv = document.createElement("div");
+            resultDiv.innerHTML = "Herein lie miscellaneous JS Codewars solutions."
+            document.body.appendChild(resultDiv);
+        }
+        
+    </script>
+</head>
+<body onload="runTest()">
+<h1>Testing things...</h1>
+
+
+</body>
+</html>
+

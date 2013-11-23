@@ -1,0 +1,107 @@
+<!doctype html>
+<head>
+	<title>Infinite (Conway's) Life</title>
+    <script type="text/javascript">
+        // http://www.codewars.com/dojo/katas/52423db9add6f6fc39000354/play/javascript
+        function getGeneration(cells, generations) {
+            if(cells.length == 0 || generations == 0) { return cells; }
+            
+            var newCells = new Array(cells.length + 1);
+            for(var i=0; i < cells.length + 2; ++i) {
+                newCells[i] = new Array(cells[0].length + 2);
+                for(var j=0; j < cells[0].length + 2; ++j) {
+                    newCells[i][j] = 0;
+                }
+            }
+            
+            for(var i=-1; i < cells.length + 1; ++i) {
+                for(var j=-1; j < cells[0].length + 1; ++j) {
+                    var neighbors = 0;
+                    if(i-1 >= 0) {
+                        cells[i-1][j-1] && (neighbors += cells[i-1][j-1]);
+                        cells[i-1][j] && (neighbors += cells[i-1][j]);
+                        cells[i-1][j+1] && (neighbors += cells[i-1][j+1]);
+                    }
+                    if(i >= 0 && i < cells.length) {
+                        cells[i][j-1] && (neighbors += cells[i][j-1]);
+                        cells[i][j+1] && (neighbors += cells[i][j+1]);
+                    }
+                    if(i+1 < cells.length) {
+                        cells[i+1][j-1] && (neighbors += cells[i+1][j-1]);
+                        cells[i+1][j] && (neighbors += cells[i+1][j]);
+                        cells[i+1][j+1] && (neighbors += cells[i+1][j+1]);
+                    }
+                    if(i >= 0 && j >= 0 && i < cells.length && j <= cells[0].length && cells[i][j]) {
+                        newCells[i+1][j+1] = (neighbors == 2 || neighbors == 3) ? 1 : 0;
+                    } else {
+                        newCells[i+1][j+1] = (neighbors == 3) ? 1 : 0;
+                    }
+                }           
+            }
+            
+            var minRow = newCells.length + 1;
+            var minColumn = newCells[0].length + 1;
+            var maxRow = 0;
+            var maxColumn = 0;
+            for(var i=0; i < newCells.length; ++i) {
+                for(var j=0; j < newCells[0].length; ++j) {
+                    if(newCells[i][j]) {
+                        minRow = Math.min(minRow, i);
+                        minColumn = Math.min(minColumn, j);
+                        maxRow = Math.max(maxRow, i);
+                        maxColumn = Math.max(maxColumn, j);
+                    }
+                }
+            }
+            
+            newCells = newCells.splice(minRow, maxRow - minRow + 1);
+            for(var i=0; i < newCells.length; ++i) {
+                newCells[i] = newCells[i].splice(minColumn, maxColumn - minColumn + 1);
+            }
+
+            return (minRow == newCells.length + 1) ? []
+                    : getGeneration(newCells, generations - 1);
+        }
+        
+        function cellsToString(cells) {
+            return cells.map(function(row) {
+                    return row.join(" "); }
+                    ).join("<br>");
+        }
+        
+        function runTest() {
+            var resultDiv = document.createElement("div");
+            
+           /*var cells = [[1,0,0],
+                        [0,1,1],
+                        [1,1,0],
+                        [0,1,0],
+                        [0,0,1],
+                        [1,1,1]];*/
+            var cells = [[1,0,0],
+                        [0,0,0],
+                        [0,1,0],
+                        [0,1,0],
+                        [0,1,1],
+                        [0,0,0]];
+            var glider = [[1,0,0],
+                          [0,1,1],
+                          [1,1,0]];
+           resultDiv.innerHTML += cellsToString(cells) + "<br><br>";
+           resultDiv.innerHTML += cellsToString(getGeneration(cells, 1)) + "<br><br>";
+           resultDiv.innerHTML += cellsToString(getGeneration([[]], 1)) + "<br><br>";
+           resultDiv.innerHTML += cellsToString(getGeneration(glider, 1)) + "<br><br>";
+
+            document.body.appendChild(resultDiv);
+        }
+        
+    </script>
+</head>
+<body onload="runTest()">
+    <h3>JS implementation of Conway's Game of Life with an infinite, automatically
+    growing/shrinking grid.</h3>
+
+
+</body>
+</html>
+
