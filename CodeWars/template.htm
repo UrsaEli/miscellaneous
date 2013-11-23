@@ -1,0 +1,28 @@
+<!doctype html>
+<head>
+	<title>CodeWars</title>
+    <script type="text/javascript">
+        function log(logString) {
+            var logItem = document.createElement("li");            
+            logItem.innerHTML = logString;
+            document.getElementById("log").appendChild(logItem);
+        }
+
+        function runTest() {
+            var problemAddress = "http://www.bing.com";
+            var problemLink = document.getElementById("problemLink");
+            problemLink.setAttribute("href", problemAddress);
+            problemLink.innerHTML = problemAddress;
+            
+            log("Foo");
+        }
+        
+    </script>
+</head>
+<body onload="runTest()">
+    <h2>Testing things...</h2>
+    <h3><a id="problemLink"></a></h3>
+    <ul id="log"></ul>
+</body>
+</html>
+
