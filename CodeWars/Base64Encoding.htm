@@ -1,0 +1,103 @@
+<!doctype html>
+<head>
+	<title>CodeWars</title>
+    <script type="text/javascript">
+        function log(logString) {
+            var logItem = document.createElement("li");            
+            logItem.innerHTML = logString;
+            document.getElementById("log").appendChild(logItem);
+        }
+
+        String.prototype.toBase64 = function() {
+            return this.split("").map(function(character) {
+                return character.charCodeAt();
+            }).reduce(function(bitPatterns, octet, index) {
+                if(index % 3 == 0) {
+                    bitPatterns.push(octet << 16);
+                    return bitPatterns;
+                } else if(index % 3 == 1) {
+                    bitPatterns[bitPatterns.length - 1] |= octet << 8; 
+                    return bitPatterns;
+                } else {
+                    bitPatterns[bitPatterns.length - 1] |= octet; 
+                    return bitPatterns;
+                }
+            }, []).reduce(function(base64Indices, bitPattern) {
+                base64Indices.push((bitPattern >> 18) & 0x3F);
+                base64Indices.push((bitPattern >> 12) & 0x3F);
+                base64Indices.push((bitPattern >> 6) & 0x3F);
+                base64Indices.push(bitPattern & 0x3F);
+                return base64Indices;
+            }, []).map(function(base64Index) {
+                if(base64Index < 26) {
+                    return String.fromCharCode(base64Index + "A".charCodeAt());
+                } else if(base64Index < 52) {
+                    return String.fromCharCode(base64Index - 26 + "a".charCodeAt());
+                } else if(base64Index < 62) {
+                    return String.fromCharCode(base64Index - 52 + "0".charCodeAt());
+                } else if(base64Index == 62) {
+                    return "+";
+                } else {
+                    return "/";
+                }
+            }).join("");
+        }
+        
+        String.prototype.fromBase64 = function() {
+            return this.split("").map(function(character) {
+                if(/[A-Z]/.test(character)) {
+                    return character.charCodeAt() - "A".charCodeAt();
+                } else if(/[a-z]/.test(character)) {
+                    return 26 + character.charCodeAt() - "a".charCodeAt();
+                } else if(/[0-9]/.test(character)) {
+                    return 52 + character.charCodeAt() - "0".charCodeAt();
+                } else if(character == "+") {
+                    return 62;
+                } else {
+                    return 63;
+                };
+            }).reduce(function(bitPatterns, septet, index) {
+                if(index % 4 == 0) {
+                    bitPatterns.push(septet << 18);
+                    return bitPatterns;
+                } else if(index % 4 == 1) {
+                    bitPatterns[bitPatterns.length - 1] |= septet << 12; 
+                    return bitPatterns;
+                } else if(index % 4 == 2) {
+                    bitPatterns[bitPatterns.length - 1] |= septet << 6;
+                    return bitPatterns;
+                } else {
+                    bitPatterns[bitPatterns.length - 1] |= septet;
+                    return bitPatterns;
+                }
+            }, []).reduce(function(asciiCodes, bitPattern) {
+                asciiCodes.push((bitPattern >> 16) & 0xFF);
+                asciiCodes.push((bitPattern >> 8) & 0xFF);
+                asciiCodes.push(bitPattern & 0xFF);
+                return asciiCodes;
+            }, []).map(function(asciiCode) {
+                return String.fromCharCode(asciiCode);
+            }).join("");        
+        }
+        
+        function runTest() {
+            var problemAddress = "http://www.codewars.com/dojo/katas/5270f22f862516c686000161/";
+            var problemLink = document.getElementById("problemLink");
+            problemLink.setAttribute("href", problemAddress);
+            problemLink.innerHTML = problemAddress;
+            log("a" + 1);
+            log("Man".toBase64());
+            log("this is a string!!".toBase64());
+            log("TWFu".fromBase64());
+            log("dGhpcyBpcyBhIHN0cmluZyEh".fromBase64());
+        }
+        
+    </script>
+</head>
+<body onload="runTest()">
+    <h2>Testing things...</h2>
+    <h3><a id="problemLink"></a></h3>
+    <ul id="log"></ul>
+</body>
+</html>
+
