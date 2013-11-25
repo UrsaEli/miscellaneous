@@ -1,0 +1,152 @@
+<!doctype html>
+<head>
+	<title>CodeWars</title>
+    <script type="text/javascript">
+        function log(logString) {
+            var logItem = document.createElement("li");            
+            logItem.innerHTML = logString;
+            document.getElementById("log").appendChild(logItem);
+        }
+
+        function List() {}
+
+        function EmptyList() {}
+        EmptyList.prototype = new List();
+        EmptyList.prototype.constructor = EmptyList;
+
+        EmptyList.prototype.toString = function() { return "()"; };
+        EmptyList.prototype.isEmpty = function() { return true; };
+        EmptyList.prototype.length = function() { return 0; };
+        EmptyList.prototype.push = function(x) {
+            return new ListNode(x, this);
+        };
+        EmptyList.prototype.remove = function(x) {
+            return this;
+        };
+        EmptyList.prototype.append = function(xs) {
+            return xs;
+        };
+
+        function ListNode(value, next) {
+            this.value = value;
+            this.next = next;
+        }
+        ListNode.prototype = new List();
+        ListNode.prototype.constructor = ListNode;
+        ListNode.prototype.isEmpty = function() { return false; };
+
+        ListNode.prototype.toString = function() {
+            var values = [this.value];
+            var nextNode = this.next;
+            while(!(nextNode instanceof EmptyList)) {
+                values.push(nextNode.value);
+                nextNode = nextNode.next;
+            }
+            return "(" + values.join(" ") + ")";
+        };
+
+        ListNode.prototype.head = function() {
+            return this.value;
+        };
+        ListNode.prototype.tail = function() {
+            return this.next;
+        };
+        ListNode.prototype.length = function() {
+            var length = 1;
+            var nextNode = this.next;
+            while(!(nextNode instanceof EmptyList)) {
+                ++length;
+                nextNode = nextNode.next;
+            }
+            return length;
+        };
+        ListNode.prototype.push = function(x) {
+            return new ListNode(x, this);
+        };
+        
+        ListNode.prototype.remove = function(x) {
+            var remainingValues = [];
+            var nodesToClone = 0;
+            var unchangedHead = this;
+            var nextNode = this;
+            while(!(nextNode instanceof EmptyList)) {
+                if(nextNode.value == x) {
+                    nodesToClone = remainingValues.length;
+                    unchangedHead = nextNode.next;
+                } else {
+                    remainingValues.push(nextNode.value);
+                }
+                nextNode = nextNode.next;
+            }
+            remainingValues = remainingValues.slice(0, nodesToClone);
+            var newHead = unchangedHead;
+            while(remainingValues.length > 0) {
+                newHead = newHead.push(remainingValues.pop());
+            }
+            return newHead;
+        };
+        
+        ListNode.prototype.append = function(xs) {
+            var thisValues = [];
+            var nextNode = this;
+            while(!(nextNode instanceof EmptyList)) {
+                thisValues.push(nextNode.value);
+                nextNode = nextNode.next;
+            }
+            var newNode = xs.push(thisValues.pop());
+            while(thisValues.length > 0) {
+                newNode = newNode.push(thisValues.pop());
+            }
+            return newNode;
+        };
+        
+        function runTest() {
+            var problemAddress = "http://www.codewars.com/dojo/katas/527bbf9f8699010bf40006ee/";
+            var problemLink = document.getElementById("problemLink");
+            problemLink.setAttribute("href", problemAddress);
+            problemLink.innerHTML = problemAddress;
+            
+            var mt, l1, l2, l3, l4;
+            mt = new EmptyList();
+            log(mt.toString());
+            l1 = mt.push('c').push('b').push('a');
+            log("mt: " + mt.toString() + " length: " + mt.length() + " isEmpty: " + mt.isEmpty());
+            l2 = l1.append(l1);
+            log(l2.toString());
+            var l5 = new EmptyList().push("f").push("e").push("d");
+            log(l5.toString());
+            var l6 = l1.append(l5);
+            log(l6.toString() + ", length " + l6.length() + ", isEmpty " + l6.isEmpty());
+            var l7 = l6.remove("b");
+            log("l7: " + l7.toString() + ", length " + l7.length() + ", isEmpty " + l7.isEmpty());
+            var l8 = l2.remove("b");
+            log("l8: " + l8.toString() + ", length " + l8.length() + ", isEmpty " + l8.isEmpty()
+                    + " head: " + l8.head() + " tail: " + l8.tail());
+            
+            
+           /* Test.it( "Simple checks", function () {
+            Test.expect(mt.isEmpty(), "Empty List is empty");
+            Test.expect( !l1.isEmpty(), "Non-empty list is not empty");
+            Test.expect(mt.toString() === "()", "()");
+            Test.expect(l3.toString() === "(a c)", "(a c)");
+            Test.expect(mt.length() === 0, "Empty list has length zero");
+            Test.expect(l1.length() === 3, "(a b c) length 3");
+            });
+
+            Test.it( "Shared structure", function () {
+            Test.expect(l2.tail().tail().tail() === l1, "(a b c a b c) shares");
+            Test.expect(l2 !== l1, "(a b c a b c) doesn't share too much");
+            Test.expect(l3.tail() === l1.tail().tail(), "(a b c) remove b shares c");
+            });*/
+            
+        }
+        
+    </script>
+</head>
+<body onload="runTest()">
+    <h2>Testing things...</h2>
+    <h3><a id="problemLink"></a></h3>
+    <ul id="log"></ul>
+</body>
+</html>
+
