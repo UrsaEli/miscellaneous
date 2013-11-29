@@ -1,0 +1,200 @@
+<!doctype html>
+<head>
+	<title>CodeWars</title>
+    <style>
+        ul#log li {
+            white-space: pre;
+            font-family: Courier;
+        }
+    </style>
+    <script type="text/javascript">
+        function log(logString) {
+            var logItem = document.createElement("li");            
+            logItem.innerHTML = logString;
+            //logItem.style.whiteSpace = "pre";
+            document.getElementById("log").appendChild(logItem);
+        }
+
+        function createGrid(code) {
+            var grid = [];
+            var line = [];
+            for(var i = 0; i < code.length; ++i) {
+                if(code[i] == "\n") {
+                    grid.push(line);
+                    line = [];
+                } else {
+                    line.push(code[i]);
+                }
+            }
+            if(line.length > 0) {
+                grid.push(line);
+            }
+            return grid;
+        }
+       
+        function getNextPosition(position, direction) {
+            var delta = { "x": 0, "y": 0 };
+            if(direction == "up") { delta.y = -1; }
+            else if(direction == "down") { delta.y = 1; }
+            else if(direction == "left") { delta.x = -1; }
+            else if(direction == "right") { delta.x = 1; }
+            position.x += delta.x;
+            position.y += delta.y;
+            return position;
+        }
+        
+        function interpret(code) {
+            // x increases to the right, y increases down.
+        
+            var output = "";
+            var position = { "x": -1, "y": 0 }; // First move will place us at (0,0)
+            var direction = "right";
+            var grid = createGrid(code);
+            // log(gridToHTML(grid));
+            var stack = [];
+            var stringMode = false;
+            
+            while(true) {
+                position = getNextPosition(position, direction);
+                var instruction = grid[position.y][position.x];
+                
+                //log("at position (" + position.x + "," + position.y + ") running instruction "
+                //        + instruction + " stack starting at [" + stack + "]");
+
+                if(stringMode) {
+                    if(instruction == '"') {
+                        stringMode = false;
+                    } else {
+                        stack.push(instruction.charCodeAt());
+                    }
+                    continue;
+                }
+                
+                if(/[0-9]/.test(instruction)) {
+                    stack.push(parseInt(instruction));
+                } else if(instruction == "+") {
+                    stack.push(stack.pop() + stack.pop());
+                } else if(instruction == "-") {
+                    var a = stack.pop();
+                    stack.push(stack.pop() - a);
+                } else if(instruction == "*") {
+                    stack.push(stack.pop() * stack.pop());
+                } else if(instruction == "/") {
+                    var a = stack.pop();
+                    var b = stack.pop();
+                    stack.push(a == 0 ? 0 : Math.floor(b / a));
+                } else if(instruction == "%") {
+                    var a = stack.pop();
+                    var b = stack.pop();
+                    stack.push(a == 0 ? 0 : b % a);
+                } else if(instruction == "!") {
+                    stack.push(stack.pop() == 0 ? 1 : 0);
+                } else if(instruction == "`") {
+                    stack.push(stack.pop() <= stack.pop() ? 1 : 0);
+                } else if(instruction == ">") {
+                    direction = "right";
+                } else if(instruction == "<") {
+                    direction = "left";
+                } else if(instruction == "^") {
+                    direction = "up";
+                } else if(instruction == "v") {
+                    direction = "down";
+                } else if(instruction == "?") {
+                    direction = ["up", "down", "left", "right"][Math.floor(4 * Math.random())];
+                } else if(instruction == "_") {
+                    direction = stack.pop() == 0 ? "right" : "left";
+                } else if(instruction == "|") {
+                    direction = stack.pop() == 0 ? "down" : "up";
+                } else if(instruction == '"') {
+                    stringMode = true;
+                } else if(instruction == ":") {
+                    if(stack.length == 0) {
+                        stack.push(0);
+                    } else {
+                        var value = stack.pop();
+                        stack.push(value);
+                        stack.push(value);
+                    }
+                } else if(instruction == "\\") {
+                    if(stack.length == 1) {
+                        stack.push(0);
+                    } else {
+                        var a = stack.pop();
+                        var b = stack.pop();
+                        stack.push(a);
+                        stack.push(b);
+                    }
+                } else if (instruction == "$") {
+                    stack.pop();
+                } else if(instruction == ".") {
+                    output += stack.pop();
+                } else if(instruction == ",") {
+                    output += String.fromCharCode(stack.pop());
+                } else if(instruction == "#") {
+                    position = getNextPosition(position, direction);
+                } else if(instruction == "p") {
+                    var y = stack.pop();
+                    var x = stack.pop();
+                    grid[y][x] = String.fromCharCode(stack.pop());
+                } else if(instruction == "g") {
+                    var y = stack.pop();
+                    var x = stack.pop();
+                    stack.push(grid[y][x].charCodeAt());
+                } else if(instruction == "@") {
+                    break;
+                } else if(instruction == " ") {
+                    /* no-op */
+                } else {
+                    throw "Unexpected instruction " + instruction;
+                }
+            }
+            
+            return output;
+        }
+
+
+        function gridToHTML(grid) {
+            var html = "";
+            for(var i = 0; i < grid.length; ++i) {
+                for(var j = 0; j < grid[i].length; ++j) {
+                    html += grid[i][j];
+                }
+                html += "<br>";
+            }
+            return html;
+        }
+
+        function runTest() {
+            var problemAddress = "http://www.codewars.com/dojo/katas/526c7b931666d07889000a3c";
+            var problemLink = document.getElementById("problemLink");
+            problemLink.setAttribute("href", problemAddress);
+            problemLink.innerHTML = problemAddress;
+            
+            // Output 1-9
+            log(interpret(">987v>.v\nv456<  :\n>321 ^ _@"));
+            
+            // Hello world
+            log(interpret('>              v\nv  ,,,,,"Hello"<\n>48*,          v\nv,,,,,,"World!"<\n>25*,@'));
+            
+            // Hello world #2
+            log(interpret('>25*"!dlrow ,olleH":v\n                 v:,_@\n                 >  ^'));
+            
+            // Sieve of Eratosthenes
+            log(interpret('2>:3g" "-!v\\  g30          <\n |!`"&":+1_:.:03p>03g+:"&"`|\n @               ^  p3\\" ":<\n2 2345678901234567890123456789012345678'));
+            
+            // Quine
+            log(interpret('01->1# +# :# 0# g# ,# :# 5# 8# *# 4# +# -# _@'));
+            
+            // Random direction test
+            log(interpret('v@.<\n >1^\n>?<^\n >2^'));
+        }
+    </script>
+</head>
+<body onload="runTest()">
+    <h2>Testing things...</h2>
+    <h3><a id="problemLink"></a></h3>
+    <ul id="log"></ul>
+</body>
+</html>
+
+
