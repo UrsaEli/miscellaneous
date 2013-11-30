@@ -1,0 +1,119 @@
+<!doctype html>
+<head>
+	<title>CodeWars</title>
+    <script type="text/javascript">
+        function log(logString) {
+            var logItem = document.createElement("li");            
+            logItem.innerHTML = logString;
+            document.getElementById("log").appendChild(logItem);
+        }
+
+        function parseTime(timeString) {
+            return timeString.split(":").map(function(t) { return parseInt(t, 10); })
+        }
+
+        function getTimeDifference(earlierTime, laterTime) {
+            return 60 * (laterTime[0] - earlierTime[0]) + (laterTime[1] - earlierTime[1])
+        }
+
+        function addFreeBlock(freeBlocks, startTime, endTime) {
+            var difference = getTimeDifference(startTime, endTime);
+            if(difference > 0) {
+                freeBlocks.push({ start: startTime, duration: difference });
+            }
+        }
+
+        function getFreeBlocks(schedules) {
+            var freeBlocks = [];
+            for(var i=0; i < schedules.length; ++i) {
+                freeBlocks.push([]);
+                var time = parseTime("09:00");
+                for(var j=0; j < schedules[i].length; ++j) {
+                    var nextMeetingStart = parseTime(schedules[i][j][0]);
+                    addFreeBlock(freeBlocks[i], time, nextMeetingStart);
+                    time = parseTime(schedules[i][j][1]);
+                }                
+                addFreeBlock(freeBlocks[i], time, parseTime("19:00"));
+            }
+            return freeBlocks;
+        }
+
+        // Returns 1 if first is earlier than second, -1 if second
+        // is earlier than first, 0 if the times are the same.
+        function compareTimes(first, second) {
+            if(first[0] < second[0]
+                    || first[0] == second[0] && first[1] < second[1]) {
+                return 1;
+            } else if(first[0] > second[0]
+                    || first[0] == second[0] && first[1] > second[1]) {
+                return -1;        
+            } else {
+                return 0;
+            }
+        }
+
+        function getNextAvailableStartTime(freeBlocks, startTime, duration) {
+            for(var i=0; i < freeBlocks.length; ++i) {
+                if(compareTimes(freeBlocks[i].start, startTime) >= 0) {
+                    if(freeBlocks[i].duration >= getTimeDifference(freeBlocks[i].start, startTime) + duration) {
+                        return startTime;
+                    }
+                } else { // startTime is before freeBlocks[i].start
+                    if(freeBlocks[i].duration >= duration) {
+                        return freeBlocks[i].start;
+                    }
+                }
+            }
+            return null;
+        }
+
+        function getStartTime(schedules, duration) {
+            var businessmenFreeBlocks = getFreeBlocks(schedules);
+            
+            var time = parseTime("9:00");
+            
+            outer: while(time[0] < 19) {
+                
+                for(var i=0; i < businessmenFreeBlocks.length; ++i) {
+                    var nextAvailableStartTime =
+                            getNextAvailableStartTime(businessmenFreeBlocks[i], time, duration);
+                    if(nextAvailableStartTime == null) {
+                        return null;
+                    } else if(compareTimes(time, nextAvailableStartTime) != 0) {
+                        time = nextAvailableStartTime;
+                        continue outer; // Start over with the first businessman
+                    }
+                }
+                // Got through all businessmen without needing to adjust
+                // start time, so we're done.
+                return time.map(function(digits) { return ("0" + digits).slice(-2); }).join(":");
+            }
+            
+            throw "Should have returned either a time or null before this";
+        }
+
+        function runTest() {
+            var problemAddress = "http://www.codewars.com/dojo/katas/525f277c7103571f47000147";
+            var problemLink = document.getElementById("problemLink");
+            problemLink.setAttribute("href", problemAddress);
+            problemLink.innerHTML = problemAddress;
+            
+            // Example from description
+            var schedules = [
+              [['09:00', '11:30'], ['13:30', '16:00'], ['16:00', '17:30'], ['17:45', '19:00']],
+              [['09:15', '12:00'], ['14:00', '16:30'], ['17:00', '17:30']],
+              [['11:30', '12:15'], ['15:00', '16:30'], ['17:45', '19:00']]
+            ];
+            log(getStartTime(schedules, 60), '12:15');
+            log(getStartTime(schedules, 90), null);
+        }
+        
+    </script>
+</head>
+<body onload="runTest()">
+    <h2>Testing things...</h2>
+    <h3><a id="problemLink"></a></h3>
+    <ul id="log"></ul>
+</body>
+</html>
+
