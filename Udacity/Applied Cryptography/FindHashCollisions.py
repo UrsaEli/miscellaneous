@@ -5,7 +5,7 @@
 # 17 January 2014
 # Udacity - Applied Cryptography
 # HW2-5 Version 2
-# Finding hash collisions for hash computed with 
+# Finding hash collisions for hash computed with counter mode
 #
 # In this assignment your job is to write a function, find_collision,
 # that finds a hash collision for any given input message.
