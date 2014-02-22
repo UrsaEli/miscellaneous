@@ -4,6 +4,8 @@
 # Utilities provided by the course for Udacity Applied Cryptography Unit 4
 #
 
+from string import printable
+
 ############################
 # This eliminates the recursion in the mod_exp
 # shown in lecture
@@ -88,3 +90,19 @@ def bits_to_int(b):
         total += b[-(i + 1)] * (2 ** i)
     
     return total
+
+# is_valid returns True if the input consist of valid
+# characters (numbers, upper case A-Z and lower case a-z and space)
+# The message still might be garbage, but this is a decent
+# and reasonably fast preliminary filter
+# valid_chars = set(c for c in string.printable[:62])
+valid_chars = set(c for c in printable)
+valid_chars.add(' ')
+def is_valid_message(decode_guess):
+    return all(d in valid_chars for d in decode_guess)
+
+
+def gcd(a, b):
+    while b != 0:
+        a, b = b, a % b
+    return a
