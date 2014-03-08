@@ -47,12 +47,7 @@
 
 # More information available: http://forums.udacity.com/cs387-april2012/questions/3506/hw5-5-challenge-question-discussion
 
-###################
-# This code is provided as an example of how to send and recieve
-# information from the server.
-# 
-# You should only need to use the `send` function
-
+import functools
 import urllib.parse
 import urllib.request
 import json
@@ -95,21 +90,23 @@ def send(attack=None):
     _TOKEN = json["token"]
     return json["message"]
 
-def xor(bytes1, bytes2):
-    # @todo: Use varargs?
-    return bytes([a ^ b for a, b in zip(bytes1, bytes2)])
+def xor(bytes1, bytes2, *additional_bytes):
+    return bytes([functools.reduce(lambda a, b: a ^ b, byte) for byte in zip(bytes1, bytes2, *additional_bytes)])
 
 def check_guess(message_start, guess_character):
-
+    """
+    Returns True if guess_character is the next byte in the message
+    after the array of bytes specified in message_start.
+    """
+    
     # Prepend the amount of characters required to cause the character
     # we are guessing to be the last character in its block.
     if (len(message_start) // CHARACTERS_PER_BLOCK) < 2:
-        start_prepended_data = "x" * (CHARACTERS_PER_BLOCK * 2 - \
+        start_prepended_data = b"x" * (CHARACTERS_PER_BLOCK * 2 - \
             len(message_start) - 1)
     else:
-        start_prepended_data = "x" * (CHARACTERS_PER_BLOCK - \
+        start_prepended_data = b"x" * (CHARACTERS_PER_BLOCK - \
                 (len(message_start) % CHARACTERS_PER_BLOCK) - 1)
-    start_prepended_data = start_prepended_data.encode(ENCODING)
     
     print("Sending initial attack", start_prepended_data , "with length", len(start_prepended_data ))
     received = send(start_prepended_data )
@@ -128,22 +125,20 @@ def check_guess(message_start, guess_character):
     # Set up the block that, if guess_character is correct, will match
     # the last plaintext block of the encrypted message.
     if len(message_start) < CHARACTERS_PER_BLOCK:
-        guess_message_block = ("x" * (CHARACTERS_PER_BLOCK - \
+        guess_message_block = (b"x" * (CHARACTERS_PER_BLOCK - \
                 len(message_start) - 1)) \
-                + message_start + chr(guess_character)
+                + message_start + bytearray([guess_character])
     else:
-        guess_message_block = message_start[-(CHARACTERS_PER_BLOCK - 1):] + chr(guess_character)
+        guess_message_block = message_start[-(CHARACTERS_PER_BLOCK - 1):] + bytearray([guess_character])
     
-    guess_message_block = guess_message_block.encode(ENCODING)
     print("guess_message_block:", guess_message_block, "length", len(guess_message_block))
     
     # Set things up so that the second block in the next message will
-    # encrypt to the samve value as encrypted_message_block if guess_message_block
+    # encrypt to the same value as encrypted_message_block if guess_message_block
     # does in fact match the actual value of the last block of the
     # encrypted message.
-    guess_prepended_data = xor(guess_message_block, guess_block_iv)
-    guess_prepended_data = xor(guess_prepended_data, message_block_iv)
-
+    guess_prepended_data = xor(guess_message_block, guess_block_iv, message_block_iv)
+    
     next_message = send(guess_prepended_data)
 
     encrypted_guess_block = next_message[0:CHARACTERS_PER_BLOCK]
@@ -154,8 +149,6 @@ def check_guess(message_start, guess_character):
 if __name__ == "__main__":
     print("Starting attack...")
     message = bytearray()
-    message = "What hath God w"
-    #message = ""
     # I'm not bothering to write in a termination condition for now;
     # it's straightforward enough just to let it spin and stop things
     # manually once the full text of the message has been obtained.
@@ -163,7 +156,7 @@ if __name__ == "__main__":
         for i in range(2 ** 8):
             print("Guessing", i)
             if check_guess(message, i):
-                message += chr(i)
+                message.append(i)
                 print("Guess of", i, "is correct, message so far:", message)
                 break
 
