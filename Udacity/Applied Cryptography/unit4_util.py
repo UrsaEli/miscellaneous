@@ -42,9 +42,17 @@ def display_bits(b):
 def seq_to_bits(seq):
     return [0 if b == '0' else 1 for b in seq]
 
+def pad_to_block(bits, block_size):
+    if len(bits) % block_size == 0:
+        return bits
+    else:
+        return pad_bits(bits, block_size * (len(bits) // block_size + 1))
+    
 def pad_bits(bits, pad):
     """pads seq with leading 0s up to length pad"""
     assert len(bits) <= pad
+    #print("pad has type", type(pad))
+    #print("bits has type", type(bits))
     return [0] * (pad - len(bits)) + bits
         
 def convert_to_bits(n):
