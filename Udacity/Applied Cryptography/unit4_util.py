@@ -1,7 +1,8 @@
 #
 # Dan Clark
 #
-# Utilities provided by the course for Udacity Applied Cryptography Unit 4
+# Utilities provided by the course for Udacity Applied Cryptography Unit 4,
+# modified and appended to by me for use throughout the rest of the course.
 #
 
 from string import printable
@@ -55,6 +56,15 @@ def pad_bits(bits, pad):
     #print("bits has type", type(bits))
     return [0] * (pad - len(bits)) + bits
         
+def pad_bits_append(small, size):
+    # as mentioned in lecture, simply padding with
+    # zeros is not a robust way way of padding
+    # as there is no way of knowing the actual length
+    # of the file, but this is good enough
+    # for the purpose of this exercise
+    diff = max(0, size - len(small))
+    return small + [0] * diff
+        
 def convert_to_bits(n):
     """converts an integer `n` to bit array"""
     result = []
@@ -74,6 +84,17 @@ def string_to_bits(s):
             map(chr_to_bit, s)
             for b in group]
 
+def hex_string_to_bits(s):
+    def chr_to_bit(c):
+        assert type(c) == str
+        assert c.isalnum() or c == ' '
+        if c == ' ':
+            return []
+        return pad_bits(convert_to_bits(int(c, 16)), 4)
+    return [b for group in 
+            map(chr_to_bit, s)
+            for b in group]
+            
 def bits_to_char(b):
     assert len(b) == ASCII_BITS
     value = 0
@@ -114,3 +135,7 @@ def gcd(a, b):
     while b != 0:
         a, b = b, a % b
     return a
+    
+def xor(a, b):
+    assert len(a) == len(b)
+    return [aa^bb for aa, bb in zip(a, b)]
